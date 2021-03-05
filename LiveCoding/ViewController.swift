@@ -18,10 +18,14 @@ struct GitHubUser: Decodable {
 
 class ViewController: UIViewController {
 
-    @IBOutlet weak var usernameTextField: UITextField!
-    @IBOutlet weak var profileImageView: UIImageView!
+    @IBOutlet private weak var usernameTextField: UITextField!
+    @IBOutlet private weak var profileImageView: UIImageView!
+
+    @IBOutlet private weak var activityIndicatorView: UIActivityIndicatorView!
 
     @IBAction func didTapDownload(_ sender: Any) {
+        activityIndicatorView.startAnimating()
+
         UserDownloader().downloadUser(
             userName: usernameTextField.text ?? "",
             success: { user in
@@ -29,13 +33,22 @@ class ViewController: UIViewController {
                     url: user.avatarURL,
                     success: { image in
                         DispatchQueue.main.async { [weak self] in
+                            self?.activityIndicatorView.stopAnimating()
                             self?.profileImageView.image = image
                         }
                     },
-                    error: {}
+                    error: { [weak self] in
+                        DispatchQueue.main.async { [weak self] in
+                            self?.activityIndicatorView.stopAnimating()
+                        }
+                    }
                 )
             },
-            error: {}
+            error: { [weak self] in
+                DispatchQueue.main.async { [weak self] in
+                    self?.activityIndicatorView.stopAnimating()
+                }
+            }
         )
     }
 }
