@@ -52,6 +52,7 @@
                     </view>
                     <connections>
                         <outlet property="activityIndicatorView" destination="78t-TD-Z2K" id="Zy1-qz-tK7"/>
+                        <outlet property="downloadButton" destination="0o7-WD-jIZ" id="P7m-qB-Vxh"/>
                         <outlet property="profileImageView" destination="DYx-Ro-Jws" id="Mt6-Rb-Ylw"/>
                         <outlet property="usernameTextField" destination="HXU-8u-8Zc" id="h8S-fH-8zt"/>
                     </connections>

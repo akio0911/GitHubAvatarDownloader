@@ -18,13 +18,23 @@ struct GitHubUser: Decodable {
 
 class ViewController: UIViewController {
 
+    private enum State {
+        case idle
+        case loading
+    }
+
+    private var state: State = .idle
+
     @IBOutlet private weak var usernameTextField: UITextField!
     @IBOutlet private weak var profileImageView: UIImageView!
 
     @IBOutlet private weak var activityIndicatorView: UIActivityIndicatorView!
 
+    @IBOutlet private weak var downloadButton: UIButton!
+
     @IBAction func didTapDownload(_ sender: Any) {
-        activityIndicatorView.startAnimating()
+        state = .loading
+        updateUI()
 
         UserDownloader().downloadUser(
             userName: usernameTextField.text ?? "",
@@ -33,23 +43,45 @@ class ViewController: UIViewController {
                     url: user.avatarURL,
                     success: { image in
                         DispatchQueue.main.async { [weak self] in
-                            self?.activityIndicatorView.stopAnimating()
+                            self?.state = .idle
+                            self?.updateUI()
+
                             self?.profileImageView.image = image
                         }
                     },
                     error: { [weak self] in
                         DispatchQueue.main.async { [weak self] in
-                            self?.activityIndicatorView.stopAnimating()
+                            self?.state = .idle
+                            self?.updateUI()
                         }
                     }
                 )
             },
             error: { [weak self] in
                 DispatchQueue.main.async { [weak self] in
-                    self?.activityIndicatorView.stopAnimating()
+                    self?.state = .idle
+                    self?.updateUI()
                 }
             }
         )
+    }
+
+    private func updateUI() {
+        downloadButton.isEnabled = {
+            switch state {
+            case .idle:
+                return true
+            case .loading:
+                return false
+            }
+        }()
+
+        switch state {
+        case .idle:
+            activityIndicatorView.stopAnimating()
+        case .loading:
+            activityIndicatorView.startAnimating()
+        }
     }
 }
 
