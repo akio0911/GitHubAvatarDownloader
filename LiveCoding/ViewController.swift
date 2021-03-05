@@ -105,12 +105,28 @@ struct DataDownloader {
                   success: @escaping (Data) -> Void,
                   error: @escaping () -> Void
                   ) {
-        DispatchQueue.global().async {
-            if let data = try? Data(contentsOf: url, options: []) {
-                success(data)
-            } else {
-                error()
+        URLSession.shared.dataTask(
+            with: url,
+            completionHandler: { data, response, err in
+                if err != nil {
+                    error()
+                    return
+                }
+
+                guard let data = data,
+                      let response = response as? HTTPURLResponse else {
+
+                    error()
+                    return
+                }
+
+                switch response.statusCode {
+                case 200:
+                    success(data)
+                default:
+                    error()
+                }
             }
-        }
+        ).resume()
     }
 }
